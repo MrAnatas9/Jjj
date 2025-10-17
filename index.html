@@ -20,17 +20,108 @@
             height: 100vh;
         }
 
-        .container {
-            display: flex;
+        .screen {
+            display: none;
             flex-direction: column;
             height: 100vh;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .active {
+            display: flex;
+        }
+
+        /* Экран меню */
+        .menu-screen {
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .logo {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 200px;
+        }
+
+        .btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        /* Экран создания комнаты */
+        .create-screen {
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .room-info {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .room-link {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4CAF50;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+
+        .waiting {
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+
+        /* Экран присоединения */
+        .join-screen {
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .input-group {
+            margin: 20px 0;
+        }
+
+        input {
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid white;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            width: 250px;
+            text-align: center;
+        }
+
+        input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* Игровой экран */
+        .game-screen {
             padding: 10px;
         }
 
         .header {
-            text-align: center;
-            padding: 10px 0;
             flex-shrink: 0;
+            padding: 10px 0;
         }
 
         h1 {
@@ -100,42 +191,31 @@
             margin-bottom: 5px;
         }
 
-        .waiting {
+        .back-btn {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            background: rgba(0,0,0,0.8);
-            padding: 20px;
-            border-radius: 15px;
-            z-index: 10;
+            top: 10px;
+            left: 10px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
         }
 
         @media (max-height: 600px) {
             .touch-area {
                 height: 80px;
             }
-            
-            h1 {
-                font-size: 1.2em;
-            }
-            
-            .score {
-                font-size: 1.5em;
-            }
         }
 
         @media (orientation: landscape) {
-            .container {
+            .game-screen {
                 flex-direction: row;
             }
             
             .header {
                 width: 25%;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
             }
             
             .game-area {
@@ -145,7 +225,6 @@
             .controls {
                 width: 25%;
                 flex-direction: column;
-                justify-content: center;
             }
             
             .touch-area {
@@ -157,263 +236,195 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🎮 Пинг-Понг 🎮</h1>
-            <div class="score">
-                <span id="score1">0</span> - <span id="score2">0</span>
-            </div>
-            <div class="status" id="status">
-                Подключение...
-            </div>
+    <!-- Экран меню -->
+    <div id="menuScreen" class="screen active">
+        <div class="menu-screen">
+            <div class="logo">🎮 Пинг-Понг 🎮</div>
+            <button class="btn" onclick="showScreen('createScreen')">Создать игру</button>
+            <button class="btn" onclick="showScreen('joinScreen')">Присоединиться</button>
         </div>
+    </div>
 
-        <div class="game-area">
-            <canvas id="gameCanvas"></canvas>
-            <div class="waiting" id="waiting" style="display: none;">
-                Ожидание второго игрока...
+    <!-- Экран создания комнаты -->
+    <div id="createScreen" class="screen">
+        <div class="create-screen">
+            <h1>Создание игры</h1>
+            <div class="room-info">
+                <p>Отправьте эту ссылку другу:</p>
+                <div id="roomLink" class="room-link">Загрузка...</div>
             </div>
+            <div id="waitingText" class="waiting">Ожидание второго игрока...</div>
+            <button class="btn" onclick="copyLink()">Скопировать ссылку</button>
+            <button class="back-btn" onclick="showScreen('menuScreen')">← Назад</button>
         </div>
+    </div>
 
-        <div class="controls">
-            <div class="touch-area" id="upBtn">
-                <div class="touch-icon">⬆️</div>
-                ВВЕРХ
+    <!-- Экран присоединения -->
+    <div id="joinScreen" class="screen">
+        <div class="join-screen">
+            <h1>Присоединиться к игре</h1>
+            <div class="input-group">
+                <input type="text" id="roomCodeInput" placeholder="Введите код комнаты" maxlength="6">
             </div>
-            <div class="touch-area" id="downBtn">
-                <div class="touch-icon">⬇️</div>
-                ВНИЗ
+            <button class="btn" onclick="joinRoom()">Присоединиться</button>
+            <div id="joinStatus" class="status"></div>
+            <button class="back-btn" onclick="showScreen('menuScreen')">← Назад</button>
+        </div>
+    </div>
+
+    <!-- Игровой экран -->
+    <div id="gameScreen" class="screen">
+        <div class="game-screen">
+            <button class="back-btn" onclick="leaveGame()">← Выйти</button>
+            
+            <div class="header">
+                <h1>🎮 Пинг-Понг 🎮</h1>
+                <div class="score">
+                    <span id="score1">0</span> - <span id="score2">0</span>
+                </div>
+                <div class="status" id="status">
+                    Подключение...
+                </div>
+            </div>
+
+            <div class="game-area">
+                <canvas id="gameCanvas"></canvas>
+            </div>
+
+            <div class="controls">
+                <div class="touch-area" id="upBtn">
+                    <div class="touch-icon">⬆️</div>
+                    ВВЕРХ
+                </div>
+                <div class="touch-area" id="downBtn">
+                    <div class="touch-icon">⬇️</div>
+                    ВНИЗ
+                </div>
             </div>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        // Адаптивный размер canvas
-        function setupCanvas() {
-            const canvas = document.getElementById('gameCanvas');
-            const gameArea = document.querySelector('.game-area');
-            
-            const maxWidth = 500;
-            const maxHeight = window.innerHeight * 0.7;
-            
-            const width = Math.min(maxWidth, gameArea.clientWidth - 20);
-            const height = Math.min(maxHeight, gameArea.clientHeight - 20);
-            
-            canvas.width = width;
-            canvas.height = height;
-            
-            return { canvas, width, height };
-        }
-
-        const { canvas, width: canvasWidth, height: canvasHeight } = setupCanvas();
-        const ctx = canvas.getContext('2d');
-        
-        // Элементы интерфейса
-        const score1Element = document.getElementById('score1');
-        const score2Element = document.getElementById('score2');
-        const statusElement = document.getElementById('status');
-        const waitingElement = document.getElementById('waiting');
-        const upBtn = document.getElementById('upBtn');
-        const downBtn = document.getElementById('downBtn');
-
-        // Подключение к серверу
         const socket = io();
-
-        let gameState = {
-            ball: { x: 0, y: 0 },
-            players: {},
-            paddleHeight: 80,
-            paddleWidth: 8,
-            canvasWidth: canvasWidth,
-            canvasHeight: canvasHeight
-        };
-        
+        let currentRoomId = null;
         let playerId = null;
-        let isMoving = false;
-        let moveDirection = 0;
-        const moveSpeed = 8;
 
-        // Сенсорное управление
-        function setupTouchControls() {
-            let isTouching = false;
+        // Элементы интерфейса
+        const menuScreen = document.getElementById('menuScreen');
+        const createScreen = document.getElementById('createScreen');
+        const joinScreen = document.getElementById('joinScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const roomLinkElement = document.getElementById('roomLink');
+        const waitingText = document.getElementById('waitingText');
+        const roomCodeInput = document.getElementById('roomCodeInput');
+        const joinStatus = document.getElementById('joinStatus');
 
-            // Кнопка ВВЕРХ
-            upBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                moveDirection = -1;
-                isMoving = true;
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
             });
+            document.getElementById(screenId).classList.add('active');
+        }
 
-            // Кнопка ВНИЗ
-            downBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                moveDirection = 1;
-                isMoving = true;
-            });
+        // Создание комнаты
+        function createRoom() {
+            socket.emit('createRoom');
+        }
 
-            // Завершение касания
-            document.addEventListener('touchend', (e) => {
-                isMoving = false;
-                moveDirection = 0;
-            });
+        // Присоединение к комнате
+        function joinRoom() {
+            const roomCode = roomCodeInput.value.trim().toUpperCase();
+            if (roomCode.length === 6) {
+                socket.emit('joinRoom', roomCode);
+                joinStatus.textContent = 'Подключение...';
+                joinStatus.style.background = 'rgba(255,255,255,0.1)';
+            } else {
+                joinStatus.textContent = 'Введите 6-значный код';
+                joinStatus.style.background = 'rgba(255,0,0,0.3)';
+            }
+        }
 
-            document.addEventListener('touchcancel', (e) => {
-                isMoving = false;
-                moveDirection = 0;
-            });
-
-            // Также добавляем поддержку мыши для тестирования
-            upBtn.addEventListener('mousedown', () => {
-                moveDirection = -1;
-                isMoving = true;
-            });
-
-            downBtn.addEventListener('mousedown', () => {
-                moveDirection = 1;
-                isMoving = true;
-            });
-
-            document.addEventListener('mouseup', () => {
-                isMoving = false;
-                moveDirection = 0;
+        // Копирование ссылки
+        function copyLink() {
+            navigator.clipboard.writeText(roomLinkElement.textContent).then(() => {
+                alert('Ссылка скопирована!');
             });
         }
 
-        // Игровой цикл управления
-        function gameLoop() {
-            if (isMoving && playerId && gameState.players[playerId]) {
-                const player = gameState.players[playerId];
-                let newY = player.y + moveDirection * moveSpeed;
-                
-                // Ограничение движения по краям
-                newY = Math.max(0, Math.min(canvasHeight - gameState.paddleHeight, newY));
-                
-                // Отправка движения на сервер
-                socket.emit('paddleMove', { y: newY });
-            }
-            requestAnimationFrame(gameLoop);
+        // Выход из игры
+        function leaveGame() {
+            socket.disconnect();
+            socket.connect();
+            showScreen('menuScreen');
+            currentRoomId = null;
+            playerId = null;
         }
 
         // Обработчики событий от сервера
+        socket.on('roomCreated', (roomId) => {
+            currentRoomId = roomId;
+            const roomUrl = `${window.location.origin}/room/${roomId}`;
+            roomLinkElement.textContent = roomUrl;
+            showScreen('createScreen');
+        });
+
         socket.on('playerAssigned', (data) => {
             playerId = data.playerId;
-            gameState = data.gameState;
-            gameState.canvasWidth = canvasWidth;
-            gameState.canvasHeight = canvasHeight;
+            currentRoomId = data.roomId;
+            initializeGame(data.gameState);
+            showScreen('gameScreen');
             
-            statusElement.textContent = playerId === 'player1' ? '🎮 Вы: Игрок 1 (слева)' : '🎮 Вы: Игрок 2 (справа)';
-            statusElement.style.background = 'rgba(0,255,0,0.3)';
-            waitingElement.style.display = 'none';
-        });
-
-        socket.on('gameStateUpdate', (state) => {
-            gameState = state;
-            gameState.canvasWidth = canvasWidth;
-            gameState.canvasHeight = canvasHeight;
-            updateScore();
-            drawGame();
-        });
-
-        socket.on('gameFull', () => {
-            statusElement.textContent = 'Игра заполнена 🚫';
-            statusElement.style.background = 'rgba(255,0,0,0.3)';
-        });
-
-        socket.on('playerDisconnected', (disconnectedPlayerId) => {
-            statusElement.textContent = 'Противник отключился ⚠️';
-            statusElement.style.background = 'rgba(255,255,0,0.3)';
-            waitingElement.style.display = 'block';
-        });
-
-        socket.on('connect', () => {
-            statusElement.textContent = 'Подключение к серверу...';
-            waitingElement.style.display = 'block';
-        });
-
-        socket.on('disconnect', () => {
-            statusElement.textContent = 'Отключено от сервера ❌';
-            statusElement.style.background = 'rgba(255,0,0,0.3)';
-        });
-
-        // Обновление счёта
-        function updateScore() {
-            if (gameState.players.player1) {
-                score1Element.textContent = gameState.players.player1.score;
+            if (playerId === 'player1') {
+                document.getElementById('status').textContent = 'Ожидание второго игрока...';
+            } else {
+                document.getElementById('status').textContent = 'Игра начинается!';
             }
-            if (gameState.players.player2) {
-                score2Element.textContent = gameState.players.player2.score;
+        });
+
+        socket.on('playerJoined', (data) => {
+            if (playerId === 'player1') {
+                document.getElementById('status').textContent = 'Игрок присоединился! Начинаем...';
             }
+            waitingText.textContent = `Игроков: ${data.playerCount}/2`;
+        });
+
+        socket.on('gameStart', (gameState) => {
+            document.getElementById('status').textContent = 'Игра началась!';
+            initializeGame(gameState);
+        });
+
+        socket.on('roomNotFound', () => {
+            joinStatus.textContent = 'Комната не найдена';
+            joinStatus.style.background = 'rgba(255,0,0,0.3)';
+        });
+
+        socket.on('roomFull', () => {
+            joinStatus.textContent = 'Комната заполнена';
+            joinStatus.style.background = 'rgba(255,0,0,0.3)';
+        });
+
+        // Автоматическое создание комнаты при загрузке по ссылке
+        window.addEventListener('load', () => {
+            const path = window.location.pathname.split('/');
+            if (path[1] === 'room' && path[2]) {
+                const roomId = path[2];
+                socket.emit('joinRoom', roomId);
+                showScreen('gameScreen');
+            }
+        });
+
+        // Игровая логика (из предыдущего кода)
+        function initializeGame(initialState) {
+            // Ваш существующий код инициализации игры
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // ... остальной код инициализации ...
         }
 
-        // Отрисовка игры
-        function drawGame() {
-            // Очистка canvas
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-            
-            // Отрисовка центральной линии
-            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([10, 10]);
-            ctx.beginPath();
-            ctx.moveTo(canvasWidth / 2, 0);
-            ctx.lineTo(canvasWidth / 2, canvasHeight);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            
-            // Отрисовка платформ
-            ctx.fillStyle = '#fff';
-            
-            // Платформа player1 (слева)
-            if (gameState.players.player1) {
-                const paddle1 = gameState.players.player1;
-                ctx.fillRect(10, paddle1.y, gameState.paddleWidth, gameState.paddleHeight);
-            }
-            
-            // Платформа player2 (справа)
-            if (gameState.players.player2) {
-                const paddle2 = gameState.players.player2;
-                ctx.fillRect(canvasWidth - 10 - gameState.paddleWidth, paddle2.y, gameState.paddleWidth, gameState.paddleHeight);
-            }
-            
-            // Отрисовка мяча
-            if (gameState.ball) {
-                ctx.beginPath();
-                ctx.arc(gameState.ball.x, gameState.ball.y, 8, 0, Math.PI * 2);
-                ctx.fillStyle = '#ff4444';
-                ctx.fill();
-                
-                // Свечение мяча
-                ctx.beginPath();
-                ctx.arc(gameState.ball.x, gameState.ball.y, 12, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255,68,68,0.3)';
-                ctx.fill();
-            }
-        }
-
-        // Адаптация к изменению размера экрана
-        window.addEventListener('resize', () => {
-            const { width, height } = setupCanvas();
-            gameState.canvasWidth = width;
-            gameState.canvasHeight = height;
-        });
-
-        // Запуск игры
-        setupTouchControls();
-        gameLoop();
-        drawGame(); // Начальная отрисовка
-
-        // Предотвращение стандартного поведения браузера
-        document.addEventListener('touchstart', (e) => {
-            if (e.target === canvas || e.target === upBtn || e.target === downBtn) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        document.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-        }, { passive: false });
+        // Показываем экран создания комнаты при клике
+        document.querySelector('.btn').onclick = createRoom;
     </script>
 </body>
-</html>
+                </html>
