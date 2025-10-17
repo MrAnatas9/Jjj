@@ -1,7 +1,7 @@
 {
   "name": "ping-pong-mobile",
   "version": "1.0.0",
-  "description": "Мультиплеерный пинг-понг для телефонов",
+  "description": "Мультиплеерный пинг-понг для телефонов с системой комнат",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
